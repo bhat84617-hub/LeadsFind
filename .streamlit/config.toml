@@ -1,0 +1,9 @@
+[client]
+# Deploy button / toolbar hatao — personal project hai
+toolbarMode = "minimal"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

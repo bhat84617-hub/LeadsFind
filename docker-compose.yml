@@ -1,0 +1,10 @@
+services:
+  leadsfind:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data   # DB + quota/history safe rahega, restart pe udega nahi
+    restart: unless-stopped
