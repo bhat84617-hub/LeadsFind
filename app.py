@@ -6,6 +6,7 @@ Admin (tum): API keys, users, payments — sirf admin panel me.
 """
 import os
 import re
+import secrets as _pylib_secrets
 import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
@@ -39,6 +40,15 @@ MENU_STYLE = {
     "nav-link-selected": {"background-color": "#ffcf3f", "color": "#0d2b26",
                           "font-weight": "800"},
 }
+
+
+def google_auth_ready() -> bool:
+    """Streamlit Secrets me [auth.google] keys hain? (Cloud dashboard ya local secrets.toml)"""
+    try:
+        g = st.secrets.get("auth", {}).get("google", {})
+        return bool(g.get("client_id") and g.get("client_secret"))
+    except Exception:
+        return False
 
 st.set_page_config(page_title="LeadsFind — Local Leads, Instant",
                    page_icon="🔍", layout="wide")
@@ -129,9 +139,26 @@ if "last_sid" not in st.session_state:
     st.session_state.last_sid = None
 if "go_billing" not in st.session_state:
     st.session_state.go_billing = False
+if "google_login" not in st.session_state:
+    st.session_state.google_login = False
 
 # ================= AUTH (glassmorphism home) =================
 if not st.session_state.username:
+    # Google se wapas aaye ho? -> auto login
+    if google_auth_ready():
+        try:
+            if st.user.is_logged_in and (st.user.email or "").strip():
+                em = st.user.email.strip().lower()
+                try:
+                    register_user(em, _pylib_secrets.token_urlsafe(16), em, "")
+                except Exception:
+                    pass
+                st.session_state.username = em
+                st.session_state.is_admin = False
+                st.session_state.google_login = True
+                st.rerun()
+        except Exception:
+            pass
     st.markdown("""<style>
 [data-testid="stAppViewContainer"]{background:linear-gradient(135deg,#0f2027 0%,
  #203a43 40%,#0d6e5f 75%,#0aa37e 100%)}
@@ -165,6 +192,12 @@ div[data-testid="stVerticalBlockBorderWrapper"]{background:rgba(255,255,255,.93)
     _, mid, _ = st.columns([1, 2, 1])
     with mid:
         with st.container(border=True):
+            if google_auth_ready():
+                if st.button("🔵 Continue with Google", use_container_width=True,
+                             type="primary"):
+                    st.login("google")
+                st.markdown("<p style='text-align:center;margin:6px 0'>— ya —</p>",
+                            unsafe_allow_html=True)
             t1, t2 = st.tabs(["🔑 Login", "📝 Naya Account"])
             with t1:
                 u = st.text_input("Username", key="li_u")
@@ -340,8 +373,13 @@ _cmap = {"Dashboard": "📊 Dashboard", "My Leads": "📁 My Leads",
          "Logout": "🚪 Logout"}
 menu = _cmap[_sel]
 if menu == "🚪 Logout":
-    for k in ("username", "is_admin", "last_df", "last_sid"):
-        st.session_state[k] = None if k != "is_admin" else False
+    if st.session_state.google_login:
+        try:
+            st.logout()
+        except Exception:
+            pass
+    for k in ("username", "is_admin", "last_df", "last_sid", "google_login"):
+        st.session_state[k] = None if k not in ("is_admin", "google_login") else False
     st.rerun()
 
 # ---------- Dashboard ----------
