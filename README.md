@@ -26,6 +26,10 @@ streamlit run app.py
 ```
 Phir browser me `http://localhost:8501`
 
+## 🚀 Render FREE pe 24/7 deploy
+[`DEPLOY.md`](DEPLOY.md) dekho — `render.yaml` + keep-alive health ping
+(`/_stcore/health` har 2 min) se app free me 24/7 awake rahegi.
+
 ## Paisa kaise kamana hai
 - Pricing page me 4 plans hain. Razorpay/Stripe button jod ke customer se Rs499-4999/mo lo.
 - Tumhara cost: SerpAPI free 100 searches, uske baad ~$50/250 searches. Isliye PRO/AGENCY me margin rakho, ya Overpass-Free default rakho.

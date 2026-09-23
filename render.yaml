@@ -1,0 +1,26 @@
+# Render Free Blueprint — LeadsFind
+# Dashboard: New -> Blueprint -> ye repo connect karo (ye file auto detect ho jayegi)
+services:
+  - type: web
+    name: leadsfind
+    runtime: docker
+    plan: free
+    # Healthy endpoint: server fully up hone pe 200 "ok" deta hai
+    healthCheckPath: /_stcore/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: ADMIN_USER
+        value: admin
+      # Neeche wali keys Render Dashboard -> Environment me baad me daalna (sync: false)
+      - key: ADMIN_PASS
+        sync: false
+      - key: SERPAPI_API_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: LF_CALLBACK_URL
+        sync: false

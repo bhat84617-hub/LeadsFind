@@ -1,0 +1,27 @@
+# Render Free instance 15 min idle pe so jata hai — ye har 2 min health
+# ping karke usko 24/7 awake rakhta hai. Pehli baar repo Settings ->
+# Secrets and variables -> Actions -> Variables me LEADSFIND_URL set karo
+# (jaise: https://leadsfind.onrender.com)
+name: Keep-Alive
+
+on:
+  schedule:
+    - cron: "*/2 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check LEADSFIND_URL configured
+        if: ${{ vars.LEADSFIND_URL == '' }}
+        run: |
+          echo "::error::Repo variable LEADSFIND_URL set nahi hai (Settings -> Secrets and variables -> Actions -> Variables)"
+          exit 1
+      - name: Ping health endpoint
+        run: |
+          URL="${{ vars.LEADSFIND_URL }}/_stcore/health"
+          echo "PING $URL"
+          code=$(curl -sS -o /tmp/health_body -w "%{http_code}" --retry 2 --retry-delay 3 --max-time 30 "$URL")
+          echo "HTTP $code : $(cat /tmp/health_body)"
+          [ "$code" = "200" ]
