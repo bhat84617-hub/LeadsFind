@@ -434,7 +434,11 @@ if menu == "📊 Dashboard":
     with t3:
         want_without = st.checkbox("🚫 Bina website wale", value=True,
                                    help="Jinki website nahi — bechne ke best client!")
-    asked = st.number_input("Kitni leads? (credits katega)", 1, remaining,
+    if remaining <= 0:
+        st.warning("💎 Credits khatam ho gaye — pehle **💎 Buy Leads** se pack lo, "
+                   "phir search karein.")
+        st.stop()
+    asked = st.number_input("Kitni leads? (credits katega)", 1, max(1, remaining),
                             value=min(20, remaining))
 
     if st.button("🚀 Leads Nikalo", type="primary"):
