@@ -408,11 +408,13 @@ if menu == "📊 Dashboard":
                 unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     with c1:
-        location = st.text_input("City *", value="Delhi")
+        location = st.text_input("City *", value="",
+                                 placeholder="Jaise: Delhi, Lucknow...")
         place_name = st.text_input("Area (optional)", value="",
                                    help="Jaise: Karol Bagh, Laxmi Nagar")
     with c2:
-        business = st.text_input("Business *", value="dentist",
+        business = st.text_input("Business *", value="",
+                                 placeholder="dentist, gym, salon, restaurant...",
                                  help="dentist, gym, salon, astrologer, restaurant...")
         _srcs = [k for k in SOURCES
                  if k not in ("serpapi", "justdial") or SERPAPI_KEY.strip()]
@@ -431,16 +433,16 @@ if menu == "📊 Dashboard":
     }
     st.caption(hints.get(platform, ""))
 
-    st.write("**✅ Apni marzi ke ticks lagao:**")
+    st.write("**✅ Apni marzi ke ticks lagao (koi tick nahi = sab leads):**")
     t1, t2, t3 = st.columns(3)
     with t1:
         need_phone = st.checkbox("📞 Number wale hi", value=False,
                                  help="Sirf phone-number wali leads")
     with t2:
-        want_with = st.checkbox("🌐 Website wale", value=True,
+        want_with = st.checkbox("🌐 Website wale", value=False,
                                 help="Jinki website bani hai")
     with t3:
-        want_without = st.checkbox("🚫 Bina website wale", value=True,
+        want_without = st.checkbox("🚫 Bina website wale", value=False,
                                    help="Jinki website nahi — bechne ke best client!")
     if remaining <= 0:
         st.warning("💎 Credits khatam ho gaye — pehle **💎 Buy Leads** se pack lo, "
