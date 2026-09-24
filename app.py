@@ -192,6 +192,74 @@ h1,h2,h3,h4{color:var(--kg900)!important;letter-spacing:-.01em!important;line-he
 .k-grad{background:var(--gsunset);background-size:220% 220%;
  -webkit-background-clip:text;background-clip:text;color:transparent;
  animation:kGrad 7s ease infinite}
+/* ===== BLACK TEXT — force (koi bhi white text invisible na rahe) ===== */
+.stApp p,.stApp li,.stApp label,.stApp small,.stApp caption,.stApp td,
+.stApp th,.stApp b,.stApp strong,.stApp a,.stApp legend,.stApp code,
+[data-testid="stMarkdownContainer"],
+[data-testid="stWidgetLabel"],
+[data-testid="stCaptionContainer"],
+[data-testid="stHelp"],
+[data-testid="stTextInput"] label,[data-testid="stNumberInput"] label,
+[data-testid="stSelectbox"] label,[data-testid="stRadio"] label{
+ color:#171717!important}
+.stApp h1,.stApp h2,.stApp h3,.stApp h4,.stApp h5{
+ color:#171717!important;text-shadow:0 0 22px rgba(177,84,249,.22)}
+.stApp input,.stApp select,.stApp textarea{color:#171717!important}
+input::placeholder,textarea::placeholder{color:#6c6b6b!important;opacity:1!important}
+/* dark zones wapas white (exceptions — baad me define, higher specificity) */
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+[data-testid="stSidebar"] p,[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div,[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] li,[data-testid="stSidebar"] a,
+[data-testid="stSidebar"] b,[data-testid="stSidebar"] small,
+[data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3{color:#e1e1e1!important;text-shadow:none}
+[data-testid="stSidebar"] .pname{color:#fff!important}
+.k-hero,.k-hero h1,.k-hero h2,.k-hero p,.k-hero span,.k-hero div,
+.k-hero i,.k-hero b,.k-hero a{color:#fff!important;text-shadow:none}
+.k-hero .k-grad{color:transparent!important}
+.k-cta-band h2,.k-cta-band span,.k-cta-band div{color:#fff!important;
+ text-shadow:none}
+.k-sec.dark,.k-sec.dark h2,.k-sec.dark h3,.k-sec.dark h4,
+.k-sec.dark p,.k-sec.dark span,.k-sec.dark div,.k-sec.dark b,
+.k-sec.dark a,.k-sec.dark li,.k-sec.dark label{color:#fff!important;
+ text-shadow:none}
+.k-sec.dark .k-card p,.k-sec.dark .k-sub,.k-sec.dark .k-ben span{
+ color:#b3b3b3!important}
+.stApp .badge,.stApp .pplan,.stApp .step-n,.stApp .btn-call,
+.stApp .btn-wa{color:#fff!important}
+.stApp .pname{color:#fff!important}
+.stApp .pq,.stApp .sup{color:var(--kg300)!important}
+[data-testid="stButton"] button[kind="primary"],
+[data-testid="stFormSubmitButton"] button,
+[data-baseweb="tab"][aria-selected="true"]{color:#fff!important}
+[data-testid="stSidebar"]{background:var(--kg900)!important}
+/* ===== GLOW — pure project purple glow ===== */
+.lf-head,.panel,.stat,.plan-card,.lead-card,.mini-price,.step,
+.k-sec,.k-faq,.k-footer,.k-marquee{
+ box-shadow:0 1px 2px rgba(23,23,23,.05),
+  0 12px 34px -10px rgba(177,84,249,.18)!important}
+.lf-head:hover,.panel:hover,.stat:hover,.plan-card:hover,.lead-card:hover,
+.mini-price:hover,.step:hover{
+ box-shadow:0 0 0 1px rgba(177,84,249,.45),
+  0 18px 44px rgba(177,84,249,.30)!important}
+.panel::before{box-shadow:0 0 14px rgba(177,84,249,.9)}
+.panel-t{text-shadow:0 0 20px rgba(177,84,249,.35)}
+.sv{text-shadow:0 0 18px rgba(177,84,249,.30)}
+[data-testid="stButton"] button[kind="primary"],
+[data-testid="stFormSubmitButton"] button{
+ box-shadow:0 0 16px rgba(177,84,249,.55),0 8px 22px rgba(131,0,233,.35)!important}
+[data-testid="stButton"] button[kind="primary"]:hover,
+[data-testid="stFormSubmitButton"] button:hover{
+ box-shadow:0 0 26px rgba(177,84,249,.85),0 12px 30px rgba(131,0,233,.45)!important}
+[data-testid="stTextInput"] input:focus,[data-testid="stNumberInput"] input:focus,
+[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within{
+ border-color:var(--kp)!important;
+ box-shadow:0 0 0 4px rgba(177,84,249,.22),0 0 24px rgba(177,84,249,.35)!important}
+.avatar{box-shadow:0 0 0 3px rgba(177,84,249,.55),0 0 24px rgba(183,138,255,.55)}
+.k-icon{box-shadow:0 8px 22px rgba(131,0,233,.45),0 0 26px rgba(177,84,249,.5)}
+.step-n{box-shadow:0 6px 16px rgba(131,0,233,.4),0 0 20px rgba(177,84,249,.55)}
+.k-faq details[open] summary{text-shadow:0 0 16px rgba(177,84,249,.4)}
 </style>""", unsafe_allow_html=True)
 
 if "username" not in st.session_state:
