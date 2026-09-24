@@ -416,6 +416,7 @@ if menu == "📊 Dashboard":
         platform = st.selectbox("Source (kahan se nikale?)", list(SOURCES.keys()),
                                 format_func=lambda p: SOURCES[p])
     hints = {
+        "gmaps_free": "🆓 Asli Google Maps data — 100% free, bina key ke.",
         "serpapi": "📍 Naam + phone + website + rating — best quality.",
         "justdial": "📞 JD-listed shops — naam + address pakka.",
         "web": "🌐 Websites wali leads.",

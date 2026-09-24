@@ -1,6 +1,20 @@
 #!/bin/sh
 set -e
 
+# ---- Google Maps (Free) scraper — localhost sidecar (Render ke bahar se inaccessible) ----
+if [ "${GMAPS_ENABLE:-1}" = "1" ]; then
+  mkdir -p /gmapsdata
+  # -c 1 = ek saath sirf 1 job (RAM + IP-block dono safe)
+  DISABLE_TELEMETRY=1 google-maps-scraper -web -data-folder /gmapsdata -c 1 \
+    >/tmp/gmaps.log 2>&1 &
+  n=0
+  until python3 -c 'import urllib.request as u; u.urlopen("http://127.0.0.1:8080/api/v1/jobs", timeout=2)' 2>/dev/null; do
+    n=$((n + 1))
+    [ "$n" -ge 30 ] && break
+    sleep 1
+  done
+fi
+
 # Google OAuth keys env-vars se Streamlit secrets.toml banao (Render/Docker ke liye)
 if [ -n "${GOOGLE_CLIENT_ID}" ] && [ -n "${GOOGLE_CLIENT_SECRET}" ]; then
   if [ -n "${LF_OAUTH_REDIRECT_URI}" ]; then

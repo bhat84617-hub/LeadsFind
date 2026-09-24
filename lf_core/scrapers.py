@@ -14,6 +14,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
            "Accept-Language": "en-IN,en;q=0.9"}
 
 SOURCES = {
+    "gmaps_free": "Google Maps (Free — no key)",
     "serpapi": "Google Maps",
     "justdial": "JustDial",
     "web": "Web Search",
@@ -393,6 +394,17 @@ def apply_filters(leads: list, need_phone: bool = False,
 def fetch_leads(platform: str, location: str, business: str, place_name: str,
                 limit: int, serpapi_key: str = "") -> list:
     platform = (platform or "demo").lower()
+    if platform in ("gmaps_free", "gmaps"):
+        from .gmaps import gmaps_fetch
+        try:
+            return gmaps_fetch(location, business, place_name, limit)
+        except Exception as e:
+            # Fallback: Google Maps fail (throttle/block/down) ho to bhi user ko
+            # khaali haath na lage — Web Search se leads de dete hain.
+            try:
+                return web_fetch(location, business, place_name, limit)
+            except Exception:
+                raise RuntimeError(str(e))
     if platform == "serpapi":
         if not serpapi_key:
             raise RuntimeError("Google Maps abhi busy hai — Web Search try karo.")
