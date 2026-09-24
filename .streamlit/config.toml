@@ -7,3 +7,11 @@ headless = true
 
 [browser]
 gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#b154f9"
+backgroundColor = "#f1f1f1"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#171717"
+
