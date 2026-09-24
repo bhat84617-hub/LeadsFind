@@ -1,8 +1,16 @@
 #!/bin/sh
 set -e
 
-# ---- Google Maps (Free) scraper — localhost sidecar (Render ke bahar se inaccessible) ----
-if [ "${GMAPS_ENABLE:-1}" = "1" ]; then
+# ---- Google Maps scraper: local sidecar, ya bahar ka (home IP) endpoint ----
+# GMAPS_BASE_URL agar localhost/127.0.0.1 se alag hai (jaise home-PC tunnel),
+# toh local scraper band rakho — scraping tumhare home IP se hogi.
+GMAPS_URL="${GMAPS_BASE_URL:-http://127.0.0.1:8080}"
+case "$GMAPS_URL" in
+  *127.0.0.1*|*localhost*) _local_gmaps=1 ;;
+  *) _local_gmaps=0 ;;
+esac
+
+if [ "${GMAPS_ENABLE:-1}" = "1" ] && [ "$_local_gmaps" = "1" ]; then
   mkdir -p /gmapsdata
   # -c 1 = ek saath sirf 1 job (RAM + IP-block dono safe)
   DISABLE_TELEMETRY=1 google-maps-scraper -web -data-folder /gmapsdata -c 1 \

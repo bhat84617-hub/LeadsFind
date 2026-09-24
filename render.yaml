@@ -32,6 +32,10 @@ services:
       # Google Console ke "Authorized redirect URIs" se EXACT match hona chahiye
       - key: LF_OAUTH_REDIRECT_URI
         value: https://leadsfind.onrender.com/oauth2callback
+      # Google Maps: agar home-PC tunnel URL do toh scraping home IP se hogi
+      # (HOME_MAPS.bat chala kar link yahan paste karo). Khali = andar ka sidecar.
+      - key: GMAPS_BASE_URL
+        sync: false
       # OAuth cookie secret — Render pehli baar ek random value khud banata hai
       - key: LF_COOKIE_SECRET
         generateValue: true

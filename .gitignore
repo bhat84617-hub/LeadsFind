@@ -5,4 +5,7 @@ __pycache__/
 data/*.db
 venv/
 bin/
+tools/
+gmapsdata/
+
 

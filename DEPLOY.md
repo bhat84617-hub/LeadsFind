@@ -5,6 +5,26 @@
 > 750 free hours/month = ek service 24/7 chalne ke liye poora mahina.
 > Neeche wala keep-alive setup free me so jane nahi deta.
 
+### 0. 🏠 Home IP setup (Google Maps ko apne PC se chalao — recommended)
+
+Render = datacenter IP (Google strict rehta hai). **Home IP** se scraping karo toh
+leads aaram se aati hain (Google trusted maanta hai). Setup (PC on + ye 2 window chahiye):
+
+1. **`HOME_MAPS.bat`** double-click karo (repo root me hai):
+   - Scraper download karke `localhost:8080` pe chalata hai (Windows exe, Docker nahi chahiye)
+   - Cloudflare tunnel kholta hai → niche `https://....trycloudflare.com` link deta hai
+2. Wo link **Render → Environment** me daalo:
+   - Key: `GMAPS_BASE_URL`, Value: `https://....trycloudflare.com` → Save
+3. Bas — ab Google Maps ki har search **tumhare home IP** se hogi.
+
+**Notes:**
+- PC band / window band → link dead → app **apne aap** OpenStreetMap/Web pe fallback lega
+  (24/7 app Render pe chalti rahegi, sirf Maps source degrade hoga).
+- Quick-tunnel link **restart pe badal** jata hai — tab Render env bhi update karo.
+- Link ke paas auth nahi hai — random URL hai, kisi ko share mat karo.
+- Zaroori nahi hai: bina iske bhi andar ka sidecar chalta hai (Render IP se),
+  bas Google thoda strict ho sakta hai.
+
 ### 1. Code GitHub pe dalo
 ```bat
 cd /d D:\LeadsFind
