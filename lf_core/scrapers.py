@@ -396,25 +396,38 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
     platform = (platform or "demo").lower()
     if platform in ("gmaps_free", "gmaps"):
         from .gmaps import gmaps_fetch
-        try:
-            return gmaps_fetch(location, business, place_name, limit)
-        except Exception as e:
-            # Fallback: Google Maps fail (throttle/block/down) ho to bhi user ko
-            # khaali haath na lage — Web Search se leads de dete hain.
+        errs = []
+        # Teeno free sources ek ke baad ek — takki user ko khaali haath na lage
+        for name, fn in (
+            ("Google Maps", lambda: gmaps_fetch(location, business, place_name, limit)),
+            ("Web Search", lambda: web_fetch(location, business, place_name, limit)),
+            ("OpenStreetMap", lambda: overpass_fetch(location, business, place_name, limit)),
+        ):
             try:
-                return web_fetch(location, business, place_name, limit)
-            except Exception as e2:
-                raise RuntimeError(f"Google Maps: {e} || Web Search: {e2}")
+                return fn()
+            except Exception as e:
+                errs.append(f"{name}: {str(e)[:120]}")
+        raise RuntimeError(" || ".join(errs)[:350])
     if platform == "serpapi":
         if not serpapi_key:
-            raise RuntimeError("Google Maps abhi busy hai — Web Search try karo.")
+            raise RuntimeError("SerpAPI key set nahi hai (Render -> Environment -> "
+                               "SERPAPI_API_KEY). Ya free 'Google Maps' source use karo.")
         return serpapi_fetch(location, business, place_name, limit, serpapi_key)
     if platform == "justdial":
+        if not serpapi_key:
+            raise RuntimeError("JustDial source ko SerpAPI key chahiye. Ya free "
+                               "'Google Maps' ya 'Web Search' source use karo.")
         return justdial_fetch(location, business, place_name, limit, serpapi_key)
     if platform == "overpass":
         return overpass_fetch(location, business, place_name, limit)
     if platform == "web":
-        return web_fetch(location, business, place_name, limit)
+        try:
+            return web_fetch(location, business, place_name, limit)
+        except Exception as e:
+            try:
+                return overpass_fetch(location, business, place_name, limit)
+            except Exception:
+                raise RuntimeError(f"Web Search: {e}")
     if platform == "all":
         return fetch_all(location, business, place_name, limit, serpapi_key)
     return demo_fetch(location, business, place_name, limit)
