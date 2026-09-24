@@ -413,7 +413,9 @@ if menu == "📊 Dashboard":
     with c2:
         business = st.text_input("Business *", value="dentist",
                                  help="dentist, gym, salon, astrologer, restaurant...")
-        platform = st.selectbox("Source (kahan se nikale?)", list(SOURCES.keys()),
+        _srcs = [k for k in SOURCES
+                 if k not in ("serpapi", "justdial") or SERPAPI_KEY.strip()]
+        platform = st.selectbox("Source (kahan se nikale?)", _srcs,
                                 format_func=lambda p: SOURCES[p])
     hints = {
         "gmaps_free": "🆓 Asli Google Maps data — 100% free, bina key ke.",
