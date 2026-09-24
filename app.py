@@ -466,8 +466,15 @@ if menu == "📊 Dashboard":
                 st.error(f"Fail: {e}")
                 st.stop()
         if not leads:
-            st.warning(f"Filter me kuch nahi mila ({len(raw)} me se 0). "
-                       "Ticks badal ke dekho (dono website tick = sab).")
+            hp = sum(1 for L in raw if (L.get("phone") or "").strip())
+            hs = sum(1 for L in raw if (L.get("website") or "")
+                     not in ("", "NO WEBSITE"))
+            st.warning(
+                f"Filter me kuch nahi mila ({len(raw)} raw me se 0). "
+                f"Raw me: **{hp}** ke paas number, **{hs}** ke paas website thi. "
+                "Ticks badal ke dekho — dono website tick = sab (filter off), "
+                "sirf 'Bina website wale' pe Web Search se 0 aayega kyunki "
+                "uski har lead website rakhti hai.")
             st.stop()
         if len(leads) < asked:
             st.info(f"Filter ke baad {len(leads)} mili ({len(raw)} me se) — "
