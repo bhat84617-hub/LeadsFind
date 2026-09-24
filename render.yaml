@@ -29,6 +29,9 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      # Google Console ke "Authorized redirect URIs" se EXACT match hona chahiye
+      - key: LF_OAUTH_REDIRECT_URI
+        value: https://leadsfind.onrender.com/oauth2callback
       # OAuth cookie secret — Render pehli baar ek random value khud banata hai
       - key: LF_COOKIE_SECRET
         generateValue: true
