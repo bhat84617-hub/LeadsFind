@@ -367,12 +367,14 @@ if not st.session_state.username:
   </div>
  </div>
  <div class="k-marquee"><div class="k-track">
-  <span>Google Maps</span><span>SerpAPI</span><span>JustDial</span>
-  <span>OpenStreetMap</span><span>Web Search</span><span>📞 Call</span>
-  <span>💬 WhatsApp</span><span>⬇ CSV export</span><span>⭐ Ratings</span>
-  <span>Google Maps</span><span>SerpAPI</span><span>JustDial</span>
-  <span>OpenStreetMap</span><span>Web Search</span><span>📞 Call</span>
-  <span>💬 WhatsApp</span><span>⬇ CSV export</span><span>⭐ Ratings</span>
+  <span>📞 Verified phone numbers</span><span>💬 WhatsApp ready</span>
+  <span>⬇ CSV export</span><span>⭐ Ratings + reviews</span>
+  <span>📍 Address + area</span><span>🚫 Bina-website filter</span>
+  <span>⚡ Instant results</span><span>🎁 5 leads FREE</span>
+  <span>📞 Verified phone numbers</span><span>💬 WhatsApp ready</span>
+  <span>⬇ CSV export</span><span>⭐ Ratings + reviews</span>
+  <span>📍 Address + area</span><span>🚫 Bina-website filter</span>
+  <span>⚡ Instant results</span><span>🎁 5 leads FREE</span>
  </div></div>""", unsafe_allow_html=True)
     _, mid, _ = st.columns([1, 2, 1])
     with mid:
@@ -426,19 +428,6 @@ if not st.session_state.username:
        <p>Jaise <b>Delhi + dentist</b> — phone/website ke ticks apni marzi se ✅.</p></div>
       <div class="k-card" style="animation-delay:.25s"><h4>3 · Leads pao</h4>
        <p>Call / WhatsApp ek click se 💬, ya poora CSV download ⬇️.</p></div>
-     </div></div>""", unsafe_allow_html=True)
-    # ---- dark showcase: sources ----
-    st.markdown("""<div class="k-sec dark">
-     <div class="k-icon">🔍</div>
-     <h2>Leads kahan se aati hain — <em>chaar sources.</em></h2>
-     <p class="k-sub">Ek fail hua toh agla source apne aap — results kabhi khaali nahi.</p>
-     <div class="k-3">
-      <div class="k-card" style="animation-delay:.05s"><h4>⭐ Google Maps</h4>
-       <p>Official SerpAPI — phone, rating, reviews pakka.</p></div>
-      <div class="k-card" style="animation-delay:.15s"><h4>📇 JustDial + OSM</h4>
-       <p>Bina-website business dhoondne ke best.</p></div>
-      <div class="k-card" style="animation-delay:.25s"><h4>🌐 Web Search</h4>
-       <p>Fresh websites wali leads — automatic fallback.</p></div>
      </div></div>""", unsafe_allow_html=True)
     st.markdown('<div class="sec-title">💎 Packs — sirf Rs49 se shuru</div>',
                 unsafe_allow_html=True)
