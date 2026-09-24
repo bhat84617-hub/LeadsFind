@@ -6,7 +6,24 @@ import os
 import re
 import time
 import random
+import socket
 import requests
+
+# ---- Render/cloud pe IPv6 route nahi hota (Errno 101 Network is unreachable).
+# Har DNS lookup ko IPv4 par force karo warna overpass/nominatim fail hote hain.
+_orig_getaddrinfo = socket.getaddrinfo
+
+
+def _ipv4_only(host, port, family=0, type=0, proto=0, flags=0):
+    res = _orig_getaddrinfo(host, port, family, type, proto, flags)
+    v4 = [r for r in res if r[0] == socket.AF_INET]
+    return v4 or res
+
+
+try:
+    socket.getaddrinfo = _ipv4_only
+except Exception:
+    pass
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                          "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -219,11 +236,23 @@ def overpass_fetch(location: str, business: str, place_name: str = "", limit: in
 );
 out body;
 """
-    r = requests.post("https://overpass-api.de/api/interpreter",
-                      data={"data": query}, timeout=60,
-                      headers={"User-Agent": "LeadsFind/1.0 (contact: care@leadsfind.in)"})
-    r.raise_for_status()
-    els = r.json().get("elements", [])
+    hdr = {"User-Agent": "LeadsFind/1.0 (contact: care@leadsfind.in)"}
+    els, last_err = None, None
+    for url in ("https://overpass-api.de/api/interpreter",
+                "https://overpass.kumi.systems/api/interpreter",
+                "https://overpass.osm.ch/api/interpreter"):
+        try:
+            r = requests.post(url, data={"data": query}, timeout=60, headers=hdr)
+            if r.status_code == 429:
+                last_err = RuntimeError("OpenStreetMap busy hai (rate-limit) — thodi der baad try karo")
+                continue
+            r.raise_for_status()
+            els = r.json().get("elements", [])
+            break
+        except Exception as e:
+            last_err = e
+    if els is None:
+        raise last_err or RuntimeError("OpenStreetMap unreachable")
     out = []
     for el in els[:limit * 3]:
         tags = el.get("tags", {})
@@ -409,6 +438,8 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
         ):
             try:
                 res = fn()
+                if not res:
+                    raise RuntimeError("0 results")
                 NOTICE["msg"] = (f"⚠️ {errs[0]} fail hua — results '{name}' se dikhaye gaye."
                                  if errs else "")
                 return res
@@ -429,6 +460,9 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
     if platform == "overpass":
         try:
             res = overpass_fetch(location, business, place_name, limit)
+            if not res:
+                raise RuntimeError("OpenStreetMap se kuch nahi mila — keyword/city "
+                                   "badal ke dekho, ya Google Maps/Web Search use karo.")
             NOTICE["msg"] = ""
             return res
         except Exception as e:

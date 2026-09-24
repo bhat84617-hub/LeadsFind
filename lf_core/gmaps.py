@@ -38,7 +38,7 @@ def _geocode(place: str):
 def gmaps_fetch(location: str, business: str, place_name: str = "",
                 limit: int = 20) -> list:
     if not gmaps_available():
-        raise RuntimeError("Google Maps (Free) abhi shuru nahi hai — Web Search try karo.")
+        raise RuntimeError("Google Maps sidecar abhi shuru nahi hai")
     if not _JOB_LOCK.acquire(blocking=False):
         raise RuntimeError("Ek aur Google Maps search abhi chal rahi hai — "
                            "1 minute ruko, phir try karo (free instance pe ek job at a time).")
