@@ -24,3 +24,11 @@ services:
         sync: false
       - key: LF_CALLBACK_URL
         sync: false
+      # Google Login (Gmail se direct signup/login)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      # OAuth cookie secret — Render pehli baar ek random value khud banata hai
+      - key: LF_COOKIE_SECRET
+        generateValue: true

@@ -29,6 +29,33 @@ git push origin main
 
 Save → service auto-redeploy.
 
+### 3b. Google Login setup (Gmail se direct signup/login) ⭐
+
+**App me button pehle se hai** — bas Google se Client ID/Secret lena hai:
+
+1. **[console.cloud.google.com](https://console.cloud.google.com)** → naya project banao (ya koi bhi select karo)
+2. **APIs & Services → OAuth consent screen**:
+   - User Type: **External** → App name, support email, developer email bharo → Save
+   - **Test users** me apne Gmail address add karo (Testing mode me sirf yehi log login kar payenge)
+3. **APIs & Services → Credentials → Create Credentials → OAuth client ID**:
+   - Application type: **Web application**
+   - **Authorized redirect URIs** me add karo (exactly same likhna):
+     ```
+     https://<tumhara-app>.onrender.com/oauth2callback
+     http://localhost:8501/oauth2callback
+     ```
+   - **Create** → **Client ID** + **Client secret** copy karo
+4. **Render → Service → Environment** me daalo:
+   | Key | Value |
+   |---|---|
+   | `GOOGLE_CLIENT_ID` | `xxxx.apps.googleusercontent.com` |
+   | `GOOGLE_CLIENT_SECRET` | `GOCSPX-...` |
+   - **Save Changes** → auto redeploy
+5. App kholo → login page pe **🔵 Continue with Google** button aa jayega
+
+> App public karne ke liye OAuth consent screen me **Publish app** dabao
+> (Testing mode me sirf Test users chalenge).
+
 ### 4. Healthy endpoint (24/7 ka proof)
 - `https://<tumhara-app>.onrender.com/_stcore/health` → **200 OK + `ok`**
 - Render ise health-check me use karta hai — app crash hui toh turant restart.
