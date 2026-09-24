@@ -416,19 +416,22 @@ if menu == "📊 Dashboard":
         business = st.text_input("Business *", value="",
                                  placeholder="dentist, gym, salon, restaurant...",
                                  help="dentist, gym, salon, astrologer, restaurant...")
-        _srcs = [k for k in SOURCES
-                 if k not in ("serpapi", "justdial") or SERPAPI_KEY.strip()]
+        # Key hai toh sabse reliable source (Google Maps via SerpAPI) pehle
+        if SERPAPI_KEY.strip():
+            _srcs = ["serpapi", "justdial", "gmaps_free", "overpass", "web"]
+        else:
+            _srcs = ["gmaps_free", "overpass", "web"]
         platform = st.selectbox("Source (kahan se nikale?)", _srcs,
                                 format_func=lambda p: SOURCES[p],
                                 index=0,
-                                help="Bina-website client chahiye toh Google Maps ya "
-                                     "OpenStreetMap best hai. Web Search me almost "
-                                     "har lead website rakhti hai.")
+                                help="Google Maps (SerpAPI) = best quality (official API). "
+                                     "Bina-website client chahiye toh tick dekho — "
+                                     "Web Search me almost har lead website rakhti hai.")
     hints = {
-        "gmaps_free": "🆓 Asli Google Maps — free; bina-website + number dono milte hain.",
+        "serpapi": "⭐ BEST — asli Google Maps official API: phone 100%, rating+reviews. Free 100 searches/mahina.",
+        "justdial": "📞 JustDial listings (SerpAPI key se).",
+        "gmaps_free": "🆓 Bina key ke Google Maps — kabhi-throttle, tab fallback.",
         "overpass": "🗺️ OpenStreetMap — free; bina-website business milne ke best.",
-        "serpapi": "📍 Naam + phone + website + rating — best quality (SerpAPI key chahiye).",
-        "justdial": "📞 JD-listed shops — naam + address pakka.",
         "web": "🌐 Websites wali leads — 'Bina website wale' tick ke saath 0 dega.",
     }
     st.caption(hints.get(platform, ""))
