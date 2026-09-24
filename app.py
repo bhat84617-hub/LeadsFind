@@ -421,8 +421,8 @@ if not st.session_state.username:
   <div class="k-eyebrow">Dhundhne ke liye clicks, <i class="k-gh">ghanton ki
    manual search nahi.</i></div>
   <div class="k-hero-grid">
-   <h1 class="k-h1">Shetron ke liye <span class="k-grad">asli business
-    leads</span> ka platform.</h1>
+   <h1 class="k-h1">Serious growth shuru hoti hai
+    <span class="k-grad">sahi leads</span> se.</h1>
    <div>
     <p class="k-desc">Har business ko ek aisa sales channel chahiye jo
      engineering challenge na ho — city + business dalo, leads turant pao.</p>
