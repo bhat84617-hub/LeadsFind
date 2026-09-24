@@ -15,10 +15,14 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
 
 SOURCES = {
     "gmaps_free": "Google Maps",
+    "overpass": "OpenStreetMap",
+    "web": "Web Search",
     "serpapi": "Google Maps (SerpAPI)",
     "justdial": "JustDial",
-    "web": "Web Search",
 }
+
+# UI ko dikhane ke liye: kaunsa source actually chala (fallback hue toh reason)
+NOTICE = {"msg": ""}
 
 PHONE_RE = re.compile(r"\+?91[\s\-]?[6-9]\d{4}[\s\-]?\d{5}|\b[6-9]\d{9}\b")
 
@@ -400,13 +404,17 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
         # Teeno free sources ek ke baad ek — takki user ko khaali haath na lage
         for name, fn in (
             ("Google Maps", lambda: gmaps_fetch(location, business, place_name, limit)),
-            ("Web Search", lambda: web_fetch(location, business, place_name, limit)),
             ("OpenStreetMap", lambda: overpass_fetch(location, business, place_name, limit)),
+            ("Web Search", lambda: web_fetch(location, business, place_name, limit)),
         ):
             try:
-                return fn()
+                res = fn()
+                NOTICE["msg"] = (f"⚠️ {errs[0]} fail hua — results '{name}' se dikhaye gaye."
+                                 if errs else "")
+                return res
             except Exception as e:
                 errs.append(f"{name}: {str(e)[:120]}")
+        NOTICE["msg"] = ""
         raise RuntimeError(" || ".join(errs)[:350])
     if platform == "serpapi":
         if not serpapi_key:
@@ -419,14 +427,25 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
                                "'Google Maps' ya 'Web Search' source use karo.")
         return justdial_fetch(location, business, place_name, limit, serpapi_key)
     if platform == "overpass":
-        return overpass_fetch(location, business, place_name, limit)
+        try:
+            res = overpass_fetch(location, business, place_name, limit)
+            NOTICE["msg"] = ""
+            return res
+        except Exception as e:
+            NOTICE["msg"] = ""
+            raise RuntimeError(str(e))
     if platform == "web":
         try:
-            return web_fetch(location, business, place_name, limit)
+            res = web_fetch(location, business, place_name, limit)
+            NOTICE["msg"] = ""
+            return res
         except Exception as e:
             try:
-                return overpass_fetch(location, business, place_name, limit)
+                res = overpass_fetch(location, business, place_name, limit)
+                NOTICE["msg"] = f"⚠️ Web Search fail hua ({str(e)[:80]}) — results 'OpenStreetMap' se dikhaye gaye."
+                return res
             except Exception:
+                NOTICE["msg"] = ""
                 raise RuntimeError(f"Web Search: {e}")
     if platform == "all":
         return fetch_all(location, business, place_name, limit, serpapi_key)

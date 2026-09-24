@@ -20,7 +20,8 @@ from lf_core.database import (init_db, register_user, login_user, get_user,
                               latest_subscription, subscription_history,
                               all_users, total_revenue, all_subscriptions)
 from lf_core.plans import PLANS, PAID_PLANS, get_plan
-from lf_core.scrapers import fetch_leads, fetch_bulk, web_bulk, apply_filters, SOURCES
+from lf_core.scrapers import (fetch_leads, fetch_bulk, web_bulk, apply_filters,
+                              SOURCES, NOTICE)
 from lf_core.billing import (is_configured, create_payment_link,
                              fetch_link_status)
 
@@ -416,12 +417,17 @@ if menu == "📊 Dashboard":
         _srcs = [k for k in SOURCES
                  if k not in ("serpapi", "justdial") or SERPAPI_KEY.strip()]
         platform = st.selectbox("Source (kahan se nikale?)", _srcs,
-                                format_func=lambda p: SOURCES[p])
+                                format_func=lambda p: SOURCES[p],
+                                index=0,
+                                help="Bina-website client chahiye toh Google Maps ya "
+                                     "OpenStreetMap best hai. Web Search me almost "
+                                     "har lead website rakhti hai.")
     hints = {
-        "gmaps_free": "🆓 Asli Google Maps data — 100% free, bina key ke.",
+        "gmaps_free": "🆓 Asli Google Maps — free; bina-website + number dono milte hain.",
+        "overpass": "🗺️ OpenStreetMap — free; bina-website business milne ke best.",
         "serpapi": "📍 Naam + phone + website + rating — best quality (SerpAPI key chahiye).",
         "justdial": "📞 JD-listed shops — naam + address pakka.",
-        "web": "🌐 Websites wali leads.",
+        "web": "🌐 Websites wali leads — 'Bina website wale' tick ke saath 0 dega.",
     }
     st.caption(hints.get(platform, ""))
 
@@ -465,16 +471,24 @@ if menu == "📊 Dashboard":
             except Exception as e:
                 st.error(f"Fail: {e}")
                 st.stop()
+        if NOTICE["msg"]:
+            st.info(NOTICE["msg"])
+            NOTICE["msg"] = ""
         if not leads:
             hp = sum(1 for L in raw if (L.get("phone") or "").strip())
             hs = sum(1 for L in raw if (L.get("website") or "")
                      not in ("", "NO WEBSITE"))
             st.warning(
                 f"Filter me kuch nahi mila ({len(raw)} raw me se 0). "
-                f"Raw me: **{hp}** ke paas number, **{hs}** ke paas website thi. "
-                "Ticks badal ke dekho — dono website tick = sab (filter off), "
-                "sirf 'Bina website wale' pe Web Search se 0 aayega kyunki "
-                "uski har lead website rakhti hai.")
+                f"Raw me: **{hp}** ke paas number, **{hs}** ke paas website thi.")
+            if want_without and not want_with:
+                st.info("💡 Tum sirf **'Bina website wale'** chahte ho — par is source "
+                        "ki almost har lead website rakhti hai. **2 me se 1 chuno:**\n"
+                        "- Source **Google Maps** ya **OpenStreetMap** rakho "
+                        "(unme sach me bina-website business milte hain), ya\n"
+                        "- Dono website ticks **ON** kar do (website wali leads bhi chalegi).")
+            else:
+                st.info("Ticks badal ke dekho — dono website tick = sab (filter off).")
             st.stop()
         if len(leads) < asked:
             st.info(f"Filter ke baad {len(leads)} mili ({len(raw)} me se) — "
