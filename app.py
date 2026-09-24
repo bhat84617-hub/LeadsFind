@@ -417,7 +417,7 @@ if menu == "📊 Dashboard":
                                 format_func=lambda p: SOURCES[p])
     hints = {
         "gmaps_free": "🆓 Asli Google Maps data — 100% free, bina key ke.",
-        "serpapi": "📍 Naam + phone + website + rating — best quality.",
+        "serpapi": "📍 Naam + phone + website + rating — best quality (SerpAPI key chahiye).",
         "justdial": "📞 JD-listed shops — naam + address pakka.",
         "web": "🌐 Websites wali leads.",
     }

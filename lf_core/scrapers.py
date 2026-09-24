@@ -14,8 +14,8 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
            "Accept-Language": "en-IN,en;q=0.9"}
 
 SOURCES = {
-    "gmaps_free": "Google Maps (Free — no key)",
-    "serpapi": "Google Maps",
+    "gmaps_free": "Google Maps",
+    "serpapi": "Google Maps (SerpAPI)",
     "justdial": "JustDial",
     "web": "Web Search",
 }
@@ -403,8 +403,8 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
             # khaali haath na lage — Web Search se leads de dete hain.
             try:
                 return web_fetch(location, business, place_name, limit)
-            except Exception:
-                raise RuntimeError(str(e))
+            except Exception as e2:
+                raise RuntimeError(f"Google Maps: {e} || Web Search: {e2}")
     if platform == "serpapi":
         if not serpapi_key:
             raise RuntimeError("Google Maps abhi busy hai — Web Search try karo.")
