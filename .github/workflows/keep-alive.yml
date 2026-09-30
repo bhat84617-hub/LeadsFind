@@ -1,27 +1,26 @@
-# Render Free instance 15 min idle pe so jata hai — ye har 2 min health
-# ping karke usko 24/7 awake rakhta hai. Pehli baar repo Settings ->
-# Secrets and variables -> Actions -> Variables me LEADSFIND_URL set karo
-# (jaise: https://leadsfind.onrender.com)
+# Render Free instance 15 min idle pe so jata hai — ye har 5 min health
+# ping karke usko 24/7 awake rakhta hai. Public repo = Actions free unlimited.
 name: Keep-Alive
 
 on:
   schedule:
-    - cron: "*/2 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Check LEADSFIND_URL configured
-        if: ${{ vars.LEADSFIND_URL == '' }}
-        run: |
-          echo "::error::Repo variable LEADSFIND_URL set nahi hai (Settings -> Secrets and variables -> Actions -> Variables)"
-          exit 1
       - name: Ping health endpoint
         run: |
-          URL="${{ vars.LEADSFIND_URL }}/_stcore/health"
+          URL="https://leadsfind.onrender.com/_stcore/health"
           echo "PING $URL"
-          code=$(curl -sS -o /tmp/health_body -w "%{http_code}" --retry 2 --retry-delay 3 --max-time 30 "$URL")
-          echo "HTTP $code : $(cat /tmp/health_body)"
-          [ "$code" = "200" ]
+          # Cold start ~50s leta hai — 4 attempts, har ek 60s tak
+          for i in 1 2 3 4; do
+            code=$(curl -sS -o /tmp/health_body -w "%{http_code}" --max-time 60 "$URL" || echo "000")
+            echo "attempt $i -> HTTP $code : $(cat /tmp/health_body 2>/dev/null)"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 15
+          done
+          echo "::error::LeadsFind health check fail — Render pe kuch galat hai"
+          exit 1
