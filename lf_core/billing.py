@@ -31,11 +31,14 @@ def create_payment_link(username: str, plan: str, amount_inr: int,
         raise RuntimeError("Razorpay keys nahi hain. .env me RAZORPAY_KEY_ID/SECRET dalo.")
     if amount_inr <= 0:
         raise ValueError("FREE plan ke liye payment nahi chahiye.")
+    # Razorpay reference_id me URL/@ jaisa kuch nahi chalta (email username fail hota hai)
+    import re
+    safe_ref = re.sub(r"[^A-Za-z0-9_-]", "-", f"LF-{username}-{plan}")[:40]
     payload = {
         "amount": int(amount_inr * 100),  # paise
         "currency": "INR",
-        "description": f"LeadsFind {plan} - {username}",
-        "reference_id": f"LF-{username}-{plan}",
+        "description": f"LeadsFind {plan} - {username}"[:140],
+        "reference_id": safe_ref,
         "reminder_enable": True,
         "callback_url": os.getenv("LF_CALLBACK_URL", "http://localhost:8501"),
         "callback_method": "get",
