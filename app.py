@@ -6,6 +6,7 @@ Admin (tum): API keys, users, payments — sirf admin panel me.
 """
 import os
 import re
+from datetime import datetime, timedelta
 import secrets as _pylib_secrets
 import pandas as pd
 import streamlit as st
@@ -553,6 +554,24 @@ if not st.session_state.username:
 username = st.session_state.username
 is_admin = st.session_state.is_admin
 
+# ---- Payment auto-verify: Razorpay se wapas aaye toh bina button dabaye credits ----
+if username and not is_admin and is_configured():
+    _sub = latest_subscription(username)
+    if _sub and _sub["status"] == "created" and _sub.get("created_at"):
+        try:
+            if datetime.now() - datetime.fromisoformat(_sub["created_at"]) < timedelta(minutes=45):
+                if fetch_link_status(_sub["link_id"])["status"] == "paid":
+                    mark_paid(_sub["link_id"], _sub["plan"], username)
+                    st.session_state["pay_flash"] = (
+                        f"🎉 Payment mil gaya! {PLANS[_sub['plan']]['total_leads']} "
+                        f"credits add — ab {quota_remaining(username)} leads bachi.")
+        except Exception:
+            pass
+_pf = st.session_state.pop("pay_flash", None)
+if _pf:
+    st.balloons()
+    st.success(_pf)
+
 # ================= ADMIN PANEL (sirf tum) =================
 if is_admin:
     st.markdown('<div class="lf-head"><h1>🛠️ LeadsFind Admin'
@@ -943,8 +962,13 @@ else:
                                                    user.get("phone", ""))
                         create_subscription(username, k, p["price_inr"],
                                             link["link_id"], link["link_url"])
-                        st.success("Link ban gaya! Neeche Pay karo.")
-                        st.rerun()
+                        # Seedha Razorpay pe le jao (iframe sandbox top-nav block
+                        # karta hai — isliye main document me meta refresh)
+                        st.markdown(f'<meta http-equiv="refresh" '
+                                    f'content="0;url={link["link_url"]}">',
+                                    unsafe_allow_html=True)
+                        st.snow()
+                        st.caption("Razorpay khul raha hai…")
                     except Exception as e:
                         st.error(str(e))
 
