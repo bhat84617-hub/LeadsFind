@@ -32,8 +32,11 @@ def create_payment_link(username: str, plan: str, amount_inr: int,
     if amount_inr <= 0:
         raise ValueError("FREE plan ke liye payment nahi chahiye.")
     # Razorpay reference_id me URL/@ jaisa kuch nahi chalta (email username fail hota hai)
+    # + har link unique chahiye (warna "reference_id already exists" error)
     import re
-    safe_ref = re.sub(r"[^A-Za-z0-9_-]", "-", f"LF-{username}-{plan}")[:40]
+    import time
+    safe_ref = re.sub(r"[^A-Za-z0-9_-]", "-", f"LF-{username}-{plan}")[:30]
+    safe_ref = f"{safe_ref}-{int(time.time())}"[:40]
     payload = {
         "amount": int(amount_inr * 100),  # paise
         "currency": "INR",
