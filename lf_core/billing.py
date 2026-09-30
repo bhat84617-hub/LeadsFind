@@ -67,3 +67,21 @@ def fetch_link_status(link_id: str) -> dict:
     j = r.json()
     return {"status": j.get("status"), "amount_paid": j.get("amount_paid", 0),
             "payments": j.get("payments", []), "raw": j}
+
+
+# ---------------- UPI direct (bina Razorpay, bina KYC) ----------------
+def upi_uri(upi_id: str, amount_inr: int, username: str, plan: str) -> str:
+    from urllib.parse import quote
+    note = f"LeadsFind {plan} - {username}"
+    return (f"upi://pay?pa={upi_id}&pn=LeadsFind&am={float(amount_inr):.2f}"
+            f"&cu=INR&tn={quote(note)}")
+
+
+def upi_qr(upi_id: str, amount_inr: int, username: str, plan: str) -> bytes:
+    """UPI payment QR — PNG bytes (st.image me direct lagao)."""
+    import io
+    import qrcode
+    img = qrcode.make(upi_uri(upi_id, amount_inr, username, plan))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()

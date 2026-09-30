@@ -281,12 +281,13 @@ def all_subscriptions(limit: int = 100):
 
 
 # ---------------- subscriptions ----------------
-def create_subscription(username, plan, amount_inr, link_id, link_url):
+def create_subscription(username, plan, amount_inr, link_id, link_url,
+                        status="created"):
     c = _conn()
     cur = c.execute(
         "INSERT INTO subscriptions(username,plan,amount_inr,link_id,link_url,status,created_at)"
         " VALUES(?,?,?,?,?,?,?)",
-        (username, plan, amount_inr, link_id, link_url, "created",
+        (username, plan, amount_inr, link_id, link_url, status,
          datetime.now().isoformat(timespec="seconds")))
     sid = cur.lastrowid
     c.commit()

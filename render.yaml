@@ -24,6 +24,9 @@ services:
         sync: false
       - key: LF_CALLBACK_URL
         sync: false
+      # UPI direct payment QR (jaise name@okhdfcbank) — bina Razorpay ke chalu
+      - key: LF_UPI_ID
+        sync: false
       # Google Login (Gmail se direct signup/login)
       - key: GOOGLE_CLIENT_ID
         sync: false

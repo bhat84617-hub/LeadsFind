@@ -23,7 +23,7 @@ from lf_core.plans import PLANS, PAID_PLANS, get_plan
 from lf_core.scrapers import (fetch_leads, fetch_bulk, web_bulk, apply_filters,
                               SOURCES, NOTICE)
 from lf_core.billing import (is_configured, create_payment_link,
-                             fetch_link_status)
+                             fetch_link_status, upi_qr)
 
 load_dotenv(override=True)
 init_db()
@@ -31,6 +31,7 @@ init_db()
 ADMIN_USER = os.getenv("ADMIN_USER", "admin").strip().lower()
 ADMIN_PASS = os.getenv("ADMIN_PASS", "admin123")
 SERPAPI_KEY = os.getenv("SERPAPI_API_KEY", "")
+UPI_ID = os.getenv("LF_UPI_ID", "").strip()
 
 MENU_STYLE = {
     "container": {"padding": "0!important", "background-color": "transparent"},
@@ -614,6 +615,19 @@ if is_admin:
         st.subheader("Saare payments")
         subs = all_subscriptions()
         st.metric("Revenue (paid)", f"Rs{total_revenue()}")
+        pend = [s for s in subs if s["status"] != "paid"]
+        if pend:
+            st.markdown("#### ⏳ Pending approvals")
+            for s in pend:
+                rc1, rc2, rc3 = st.columns([3, 2, 2])
+                rc1.write(f"**{s['username']}** — {s['plan']} "
+                          f"(Rs{s['amount_inr']}) — `{s['status']}` — {s['link_id']}")
+                if rc2.button("✅ Approve", key=f"apv{s['id']}"):
+                    mark_paid(s["link_id"], s["plan"], s["username"])
+                    st.success(f"{PLANS[s['plan']]['total_leads']} credits "
+                               f"{s['username']} ko de diye")
+                    st.rerun()
+                rc3.write(s["created_at"])
         if subs:
             st.dataframe(pd.DataFrame(subs), use_container_width=True)
 
@@ -621,6 +635,7 @@ if is_admin:
         st.subheader("🔑 API Keys & Setup (secret — sirf tum)")
         st.write(f"SerpAPI: {'✅ set hai' if SERPAPI_KEY else '❌ missing — .env me SERPAPI_API_KEY dalo'}")
         st.write(f"Razorpay: {'✅ LIVE' if is_configured() else '❌ missing — .env me RAZORPAY_KEY_ID/SECRET dalo'}")
+        st.write(f"UPI QR: {'✅ ' + UPI_ID if UPI_ID else '❌ missing — .env me LF_UPI_ID dalo (jaise name@okhdfcbank)'}")
         with st.expander("Razorpay keys kaise laaye?"):
             st.write("1. razorpay.com → Settings → API Keys → Test Mode keys banao\n"
                      "2. `D:\\LeadsFind\\.env` me dalo:\n"
@@ -917,7 +932,10 @@ else:
                         unsafe_allow_html=True)
             if st.button(f"Buy {k}", key=f"buy{k}", type="primary" if k == "PRO" else "secondary"):
                 if not is_configured():
-                    st.error("Online payment jald live hoga. Support se sampark karo.")
+                    if UPI_ID:
+                        st.info("Razorpay abhi set nahi — **UPI QR** se neeche direct pay kar lo 👇")
+                    else:
+                        st.error("Payment setup ho raha hai. Support: care@leadsfind.in")
                 else:
                     try:
                         link = create_payment_link(username, k, p["price_inr"],
@@ -947,6 +965,48 @@ else:
                     st.warning(f"Status: {stt['status']}. Pehle pay karo, fir dabao.")
             except Exception as e:
                 st.error(str(e))
+
+    # ---------------- UPI direct QR (bina Razorpay, turant chalu) ----------------
+    if UPI_ID:
+        st.divider()
+        st.markdown('<div class="panel"><div class="panel-t">📱 UPI se direct pay</div>'
+                    '<div class="panel-s">QR scan karo ya UPI ID pe bhejo — payment '
+                    'milte hi <b>credits turant</b> add ho jaate hain.</div></div>',
+                    unsafe_allow_html=True)
+        up1, up2 = st.columns([1, 1])
+        with up1:
+            uplan = st.selectbox("Plan chuno", PAID_PLANS, key="upi_plan",
+                                 format_func=lambda x: f"{x} — Rs{PLANS[x]['price_inr']} "
+                                                       f"({PLANS[x]['total_leads']} leads)")
+            uamt = PLANS[uplan]["price_inr"]
+            st.markdown(f"**UPI ID:** `{UPI_ID}`")
+            st.markdown(f"**Amount:** ₹{uamt} (exact bhejo)")
+            st.code(f"upi://pay?pa={UPI_ID}&pn=LeadsFind&am={float(uamt):.2f}&cu=INR",
+                    language=None)
+        with up2:
+            st.image(upi_qr(UPI_ID, uamt, username, uplan),
+                     caption=f"Pay ₹{uamt} — {uplan}", width=230)
+        uref = st.text_input("UPI Reference / Transaction ID (payment app me milti hai)",
+                             key="upi_ref",
+                             help="PhonePe/GPay/Paytm → Transaction details → UTR/Ref no.")
+        if st.button("✅ Maine pay kar liya — Credits pao", type="primary",
+                     key="upi_submit"):
+            if not uref.strip():
+                st.error("Ref ID daalo (jaise 12-digit UTR).")
+            elif any(s["link_id"] == f"UPI-{uref.strip()}"
+                     for s in subscription_history(username)):
+                st.warning("Ye Ref ID pehle se submit ho chuka hai.")
+            else:
+                create_subscription(username, uplan, uamt,
+                                    f"UPI-{uref.strip()}", "",
+                                    status="upi_pending")
+                st.success("✅ Ref ID submit ho gaya! Payment verify hote hi "
+                           "credits turant add ho jayenge. 🎉")
+                st.rerun()
+    elif not is_configured():
+        st.info("💳 Payment methods jald live — abhi free leads (5) use karo ya "
+                "support se sampark karo: care@leadsfind.in")
+
     with st.expander("Mere orders"):
         for s in subscription_history(username):
             st.write(f"#{s['id']} {s['created_at']} {s['plan']} Rs{s['amount_inr']} — {s['status']}")
