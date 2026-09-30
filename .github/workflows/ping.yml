@@ -1,0 +1,22 @@
+# Render free instance ko awake rakho — har 5 min health ping
+name: Ping-LeadsFind
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health ping (with cold-start retries)
+        run: |
+          URL="https://leadsfind.onrender.com/_stcore/health"
+          for i in 1 2 3 4; do
+            code=$(curl -sS -o /tmp/b -w "%{http_code}" --max-time 60 "$URL" || echo "000")
+            echo "attempt $i -> $code : $(cat /tmp/b 2>/dev/null)"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          exit 1
