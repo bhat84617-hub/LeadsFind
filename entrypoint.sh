@@ -46,4 +46,14 @@ server_metadata_url = "https://accounts.google.com/.well-known/openid-configurat
 EOF
 fi
 
-exec streamlit run app.py --server.port="${PORT:-8501}" --server.address=0.0.0.0
+# Config flags yahan CLI pe hain (highest precedence) — Render pe config.toml
+# resolve nahi ho raha tha (dark theme + static serving off), isliye yahan force.
+exec streamlit run app.py --server.port="${PORT:-8501}" --server.address=0.0.0.0 \
+  --server.enableStaticServing=true \
+  --client.toolbarMode=minimal \
+  --browser.gatherUsageStats=false \
+  --theme.base=light \
+  --theme.primaryColor="#b154f9" \
+  --theme.backgroundColor="#f1f1f1" \
+  --theme.secondaryBackgroundColor="#ffffff" \
+  --theme.textColor="#171717"
