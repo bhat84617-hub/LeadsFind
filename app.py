@@ -25,9 +25,11 @@ from lf_core.scrapers import (fetch_leads, fetch_bulk, web_bulk, apply_filters,
                               SOURCES, NOTICE)
 from lf_core.billing import (is_configured, create_payment_link,
                              fetch_link_status, upi_qr)
+from lf_core.keepalive import start_keepalive
 
 load_dotenv(override=True)
 init_db()
+start_keepalive()
 
 ADMIN_USER = os.getenv("ADMIN_USER", "admin").strip().lower()
 ADMIN_PASS = os.getenv("ADMIN_PASS", "admin123")
