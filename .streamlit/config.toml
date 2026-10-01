@@ -4,6 +4,8 @@ toolbarMode = "minimal"
 
 [server]
 headless = true
+# static/ folder se fonts serve hoti hain (local font = zero Google round-trip)
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false

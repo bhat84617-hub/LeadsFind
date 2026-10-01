@@ -23,7 +23,13 @@ def hash_pw(pw: str) -> str:
     return hashlib.sha256(("LF$" + pw).encode()).hexdigest()
 
 
+_db_ready = False
+
+
 def init_db():
+    global _db_ready
+    if _db_ready:
+        return  # har rerun pe DDL chalane ki zaroorat nahi
     c = _conn()
     c.execute("""CREATE TABLE IF NOT EXISTS users(
         username TEXT PRIMARY KEY,
@@ -76,6 +82,7 @@ def init_db():
     )""")
     c.commit()
     c.close()
+    _db_ready = True
 
 
 # ---------------- auth ----------------

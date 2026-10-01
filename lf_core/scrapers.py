@@ -41,6 +41,32 @@ SOURCES = {
 # UI ko dikhane ke liye: kaunsa source actually chala (fallback hue toh reason)
 NOTICE = {"msg": ""}
 
+# ---------- Result cache: same query 15 min me turant (bina dobara scraping) ----------
+_LEAD_CACHE = {}
+_CACHE_TTL = 900
+_CACHE_MAX = 60
+
+
+def _cache_key(kind, location, business, place_name, limit):
+    return (kind, (location or "").strip().lower(), (business or "").strip().lower(),
+            (place_name or "").strip().lower(), int(limit or 0))
+
+
+def _cache_get(key):
+    hit = _LEAD_CACHE.get(key)
+    if hit and time.time() - hit[0] < _CACHE_TTL and hit[1]:
+        return hit
+    return None
+
+
+def _cache_put(key, leads, notice):
+    try:
+        if len(_LEAD_CACHE) >= _CACHE_MAX:
+            _LEAD_CACHE.pop(next(iter(_LEAD_CACHE)))
+        _LEAD_CACHE[key] = (time.time(), [dict(x) for x in leads], notice)
+    except Exception:
+        pass
+
 PHONE_RE = re.compile(r"\+?91[\s\-]?[6-9]\d{4}[\s\-]?\d{5}|\b[6-9]\d{9}\b")
 
 
@@ -136,8 +162,8 @@ def _gmaps_round(q: str, pages: int, api_key: str, out: list, seen: set,
         time.sleep(1.0)
 
 
-def fetch_bulk(location: str, business: str, place_name: str = "", limit: int = 100,
-               api_key: str = "") -> list:
+def _fetch_bulk_uncached(location: str, business: str, place_name: str = "", limit: int = 100,
+                         api_key: str = "") -> list:
     """Bade packs (300/800/1800) ek click me: kayi query-variant + dedup.
     Jitna mila utna wapas; credits sirf delivered pe katega."""
     if not api_key:
@@ -156,6 +182,19 @@ def fetch_bulk(location: str, business: str, place_name: str = "", limit: int = 
         if len(out) >= limit or budget[0] <= 0:
             break
     return out[:limit]
+
+
+def fetch_bulk(location: str, business: str, place_name: str = "", limit: int = 100,
+               api_key: str = "") -> list:
+    key = _cache_key("bulk", location, business, place_name, limit)
+    hit = _cache_get(key)
+    if hit:
+        NOTICE["msg"] = hit[2]
+        return [dict(x) for x in hit[1]]
+    res = _fetch_bulk_uncached(location, business, place_name, limit, api_key)
+    if res:
+        _cache_put(key, res, NOTICE["msg"])
+    return res
 
 
 # ---------- JustDial via Google (JD direct anti-bot se blocked hai) ----------
@@ -317,7 +356,7 @@ def web_fetch(location: str, business: str, place_name: str = "", limit: int = 2
     return out[:limit]
 
 
-def web_bulk(location: str, business: str, place_name: str = "", limit: int = 100) -> list:
+def _web_bulk_uncached(location: str, business: str, place_name: str = "", limit: int = 100) -> list:
     """FREE + UNLIMITED bulk: kayi query-variant, zero cost, koi budget cap nahi.
     Bade packs (300/800/1800) bina SerpAPI kharch ke fulfill karo."""
     from ddgs import DDGS
@@ -348,6 +387,18 @@ def web_bulk(location: str, business: str, place_name: str = "", limit: int = 10
     if not out:
         raise RuntimeError("Web search se kuch nahi mila. Spelling badal ke dekho.")
     return out[:limit]
+
+
+def web_bulk(location: str, business: str, place_name: str = "", limit: int = 100) -> list:
+    key = _cache_key("webbulk", location, business, place_name, limit)
+    hit = _cache_get(key)
+    if hit:
+        NOTICE["msg"] = hit[2]
+        return [dict(x) for x in hit[1]]
+    res = _web_bulk_uncached(location, business, place_name, limit)
+    if res:
+        _cache_put(key, res, NOTICE["msg"])
+    return res
 
 
 # ---------- Demo ----------
@@ -424,8 +475,8 @@ def apply_filters(leads: list, need_phone: bool = False,
     return out
 
 
-def fetch_leads(platform: str, location: str, business: str, place_name: str,
-                limit: int, serpapi_key: str = "") -> list:
+def _fetch_leads_uncached(platform: str, location: str, business: str, place_name: str,
+                          limit: int, serpapi_key: str = "") -> list:
     platform = (platform or "demo").lower()
     if platform in ("gmaps_free", "gmaps"):
         from .gmaps import gmaps_fetch
@@ -484,3 +535,18 @@ def fetch_leads(platform: str, location: str, business: str, place_name: str,
     if platform == "all":
         return fetch_all(location, business, place_name, limit, serpapi_key)
     return demo_fetch(location, business, place_name, limit)
+
+
+def fetch_leads(platform: str, location: str, business: str, place_name: str,
+                limit: int, serpapi_key: str = "") -> list:
+    """Cached wrapper: 15 min ke andar same query turant (scrape nahi hota dobara).
+    Khali/failed results cache nahi hote."""
+    key = _cache_key(platform or "demo", location, business, place_name, limit)
+    hit = _cache_get(key)
+    if hit:
+        NOTICE["msg"] = hit[2]
+        return [dict(x) for x in hit[1]]
+    res = _fetch_leads_uncached(platform, location, business, place_name, limit, serpapi_key)
+    if res:
+        _cache_put(key, res, NOTICE["msg"])
+    return res
