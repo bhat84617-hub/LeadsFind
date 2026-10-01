@@ -12,6 +12,7 @@ RUN python3 -m venv /opt/venv \
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY lf_core ./lf_core
+COPY static ./static
 COPY app.py .streamlit entrypoint.sh ./
 RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh && mkdir -p data /gmapsdata
 
